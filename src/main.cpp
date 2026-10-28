@@ -45,7 +45,7 @@ void setup() {
     // Thử nghiệm ghi dữ liệu vào file
     File file = SD.open("/test.txt", FILE_WRITE);
     if (file) {
-        file.println("Hello CubeSat from RAW SPI (CS=13, SCK=18, MISO=19, MOSI=23)!");
+        file.println("Hello world from RAW SPI (CS=13, SCK=18, MISO=19, MOSI=23)!");
         file.close();
         Serial.println("[RAW] Đã ghi nội dung thử nghiệm vào /test.txt");
     } else {
