@@ -4,11 +4,15 @@
  * Mô tả:
  * Sử dụng thư viện SD gốc (giao tiếp SPI) để ghi log thẻ nhớ.
  * Định nghĩa chuẩn xác chân phần cứng CubeSat: CS=13, SCK=18, MISO=19, MOSI=23.
+ * Tích hợp đối tượng cdh (PTIT_CDH) chuẩn hóa phân hệ C&DH.
  */
 
 #include <Arduino.h>
 #include <SD.h>
 #include <SPI.h>
+#include <PTITCube.h>
+
+PTIT_CDH cdh;
 
 #define SD_CS_PIN   13
 #define SD_SCK_PIN  18
@@ -17,12 +21,11 @@
 
 bool sdReady = false;
 
-// Hàm ghi log thuần bằng thư viện SD.h
 void logData(const char* data) {
     if (!sdReady) return;
     File file = SD.open("/log.txt", FILE_APPEND);
     if (!file) {
-        Serial.println("[Storage] Failed to open /log.txt for appending");
+        cdh.println("[SD] Open /log.txt failed");
         return;
     }
     file.println(data);
@@ -30,46 +33,33 @@ void logData(const char* data) {
 }
 
 void setup() {
-    Serial.begin(115200);
-    while (!Serial) { delay(10); }
+    cdh.begin(115200);
+    while (!cdh) { delay(10); }
 
-    Serial.println("\n[EXAMPLE] Khởi tạo thẻ nhớ...");
-    Serial.println("[Storage] Initializing MicroSD (SPI)...");
-
-    // Khởi tạo SPI bus với chân phần cứng CubeSat
+    cdh.println("[CDH] MicroSD SPI Init");
     SPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
 
     if (!SD.begin(SD_CS_PIN, SPI, 8000000)) {
-        Serial.println("[Storage] MicroSD mount failed");
+        cdh.println("[SD] Mount failed");
         sdReady = false;
         return;
     }
 
-    Serial.println("[Storage] MicroSD mount OK");
+    cdh.printf("[SD] OK. Total: %llu MB, Used: %llu MB\n", 
+               SD.totalBytes() / (1024 * 1024), 
+               SD.usedBytes() / (1024 * 1024));
     sdReady = true;
 
-    // In thông tin thẻ nhớ
-    Serial.print("[Storage] Tổng: ");
-    Serial.print(SD.totalBytes() / (1024 * 1024));
-    Serial.print(" MB, Đã dùng: ");
-    Serial.print(SD.usedBytes() / (1024 * 1024));
-    Serial.println(" MB");
-
-    // Ghi thử một dòng Boot vào log
-    logData("=============================");
-    logData("SYSTEM BOOT: CUBESAT V1");
-    logData("=============================");
+    logData("BOOT: PTITCUBE C&DH");
 }
 
 void loop() {
     static int counter = 0;
+    char buf[64];
+    snprintf(buf, sizeof(buf), "[DATA] #%d | Uptime: %lums", counter++, millis());
+    
+    cdh.println(buf);
+    logData(buf);
 
-    String data = "Hello world #" + String(counter) + " - Uptime: " + String(millis()) + "ms";
-    Serial.println(data);
-
-    logData(data.c_str());
-
-    counter++;
     delay(3000);
 }
-
