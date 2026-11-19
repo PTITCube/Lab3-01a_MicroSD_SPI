@@ -31,7 +31,7 @@ void setup() {
 
     SPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
     if (!SD.begin(SD_CS_PIN, SPI, 8000000)) {
-        cdh.println("[SD] Mount failed");
+        cdh.println("SD: Mount failed");
         return;
     }
     sdReady = true;
@@ -41,7 +41,7 @@ void setup() {
 void loop() {
     static int counter = 0;
     char buf[64];
-    snprintf(buf, sizeof(buf), "[DATA] #%d | Uptime: %lums", counter++, millis());
+    snprintf(buf, sizeof(buf), "DATA #%d | Uptime: %lums", counter++, millis());
     
     cdh.println(buf);
     logData(buf);
