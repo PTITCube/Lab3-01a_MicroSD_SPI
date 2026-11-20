@@ -7,6 +7,7 @@
 #include <PTITCube.h>
 
 PTIT_CDH cdh;
+PTIT_EPS eps;
 
 #define SD_CS_PIN   13
 #define SD_SCK_PIN  18
@@ -28,6 +29,9 @@ void logData(const char* message) {
 
 void setup() {
     cdh.begin(115200);
+
+    // Kích hoạt hạ áp cấp nguồn ngoại vi trên PCB vệ tinh qua thư viện EPS
+    eps.setBuckState(true);
 
     SPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_CS_PIN);
     if (!SD.begin(SD_CS_PIN, SPI, 8000000)) {
