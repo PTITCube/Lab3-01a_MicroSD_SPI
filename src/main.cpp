@@ -45,7 +45,7 @@ void setup() {
 void loop() {
     static int counter = 0;
     char buf[64];
-    snprintf(buf, sizeof(buf), "DATA #%d | Uptime: %lums", counter++, millis());
+    snprintf(buf, sizeof(buf), "Hello World #%d", counter++);
     
     cdh.println(buf);
     logData(buf);
